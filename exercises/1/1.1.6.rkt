@@ -56,5 +56,72 @@
 (define (test a b)
   (if (= a 0) 0 b))
 
-(test 0 (p)) ; => infinite loop if applicative-order evaluation; 0 if normal-order
-(test 0 (/ 1 0)) ; => division-by-zero error if applicative-order evaluation; 0 if normal-order
+;; (test 0 (p)) ; => infinite loop if applicative-order evaluation; 0 if normal-order
+;; (test 0 (/ 1 0)) ; => division-by-zero error if applicative-order evaluation; 0 if normal-order
+
+
+;; Ex. 1.6
+;; new-if is now implemented using cond, rather than as a
+;; special form. Therefore, both the then- and else-clauses
+;; will be expanded before cond may return the value. The else-
+;; clause will then lead to an infinite loop (recursively
+;; calling sqrt-iter). The guess will eventually meet and
+;; exceed the tolerance, but the base case (then-clause) will
+;; never preempt evaluating the looping case.
+
+;; Ex. 1.7
+;; (define (good-enough? guess x)
+;;   (< (abs (- (square guess) x)) 0.001))
+;; For any sqrt substantially (say, an order of magnitude)
+;; smaller than tolerance (here 0.001), the guess will be off.
+;; I.e. TOL bounds the expected error if hardcoded.
+;; For large numbers (orders of magnitude larger than TOL),
+;; setting the TOL arbitrarily to 0.001 will lead to unnecessary
+;; calculations. Worse yet, limited precision may lead infinite looping
+;; (no progress is made in subsequent cycles because TOL falls below 
+;; precision threshold).
+
+;; implementing relative tolerance
+(define
+  (abs x)
+  (if (< x 0)
+      (- x)
+      x))
+(define
+  (about-right? a b tol)
+  (< (abs (- a b)) (* tol b)))
+(define TOL 0.001)
+(define
+  (improve guess x)
+  (/ (+ guess (/ x guess)) 2.0))
+(define
+  (sqrt-iter x guess)
+  (if (about-right? (square guess) x TOL)
+      guess
+      (sqrt-iter x (improve guess x))))
+(define
+  (sqrt x)
+  (sqrt-iter x 1.0))
+
+;; Ex. 1.8
+;; naive implementation with absolute tolerance
+(define
+  (mean3 a b c)
+  (/ (+ a b c) 3.0))
+(define
+  (cube x)
+  (* x (square x)))
+(define
+  (good-enough? x guess)
+  (< (abs (- x (cube guess))) TOL))
+(define
+  (improve3 guess x)
+  (mean3 (/ x (square guess)) guess guess))
+(define
+  (cube-root-iter x guess)
+  (if (good-enough? x guess)
+      guess
+      (cube-root-iter x (improve3 guess x))))
+(define
+  (cube-root x)
+  (cube-root-iter x 1.0))
