@@ -91,3 +91,11 @@
 			(helper-sum first second third)
 			first
 			second))))
+
+;; Ex. 1.12
+;; naive recursive implementation
+(define (pascal-coeff row col)
+  (cond ((or (= col 1)
+	     (= col row)) 1)
+	(else (+ (pascal-coeff (- row 1) (- col 1))
+		 (pascal-coeff (- row 1) col)))))
